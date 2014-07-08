@@ -93,6 +93,7 @@ public class EventLog {
 				//writer.flush();
 			}			
 		} else {
+			
 			Log.d(TAG, formatedData);			
 		}
 	}
@@ -110,9 +111,9 @@ public class EventLog {
 		return sb.toString();
 	}	
 	
-	public static void writePublic(LogType type, String data) {
+	public static void writePublic(LogType type, String data) {	
 		String formatedData = data2FormatedData(type, data);
-		write2(null, formatedData);
+		Log.d(TAG, formatedData);		
 		for (EventLog logger : loggers) {
 			write2(logger.writer, formatedData);			
 		}
@@ -120,7 +121,7 @@ public class EventLog {
 		
 	public void writePrivate(LogType type, String data) {
 		String formatedData = data2FormatedData(type, data);
-		write2(null, formatedData);
+		Log.d(TAG, formatedData);
 		write2(writer, formatedData);			
 	}	
 

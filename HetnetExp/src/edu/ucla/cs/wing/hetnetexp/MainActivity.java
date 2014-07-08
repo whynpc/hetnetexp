@@ -4,10 +4,13 @@ package edu.ucla.cs.wing.hetnetexp;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import edu.ucla.cs.wing.hetnetexp.EventLog.LogType;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
@@ -21,7 +24,6 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
 		
 		msgbox = (EditText) findViewById(R.id.msgbox);
 		
@@ -55,6 +57,7 @@ public class MainActivity extends Activity {
 	
 	public void onClickUdpStart(View view) {
 		
+	
 	}
 	
 	public void onClickUdpStop(View view) {
@@ -70,17 +73,33 @@ public class MainActivity extends Activity {
 		
 	}
 	
-	public void onClickPingpongStart(View view) {
-		
+	public void onClickPingpongStart(View view) {	
+		EventLog.writePublic(LogType.DEBUG, "pingpong start");
+		BackgroundService.getInstance().startPingpong();
 	} 
 	
-	public void onClickPingpongStop(View view) {
-		
+	public void onClickPingpongStop(View view) {	
+		EventLog.writePublic(LogType.DEBUG, "pingpong stop");
+		BackgroundService.getInstance().stopPingpong();
 	}
 	
 	public void onClickDebug(View view) {
 		
 	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_settings:
+			this.startActivity(new Intent(MainActivity.this,
+					SettingsActivity.class));
+			break;
+
+		default:
+			break;
+		}
+		return true;
+	}	
 	
 	private void updateMsgbox() {
 		while (msgQueue.size() > 5) {
