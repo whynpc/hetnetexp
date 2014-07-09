@@ -26,15 +26,13 @@ public class BackgroundService extends Service {
 	
 	public static BackgroundService getInstance() {
 		return _instance;
-		
 	}
 	
 	public static final int MONITOR_INTERVAL = 100;
 	
-	
 	// comm with server
 	public static final int OP_UDP_START = 1;
-	public static final int OP_UDP_STOP = 1;
+	public static final int OP_UDP_STOP = 2;
 	
 	private Handler handler = new Handler() {
 		@Override
@@ -68,6 +66,8 @@ public class BackgroundService extends Service {
 	private DatagramSocket udpSocket;	
 	
 	private EventLog udpLog, traceLog;
+	
+	private String lastTestLog;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -90,6 +90,7 @@ public class BackgroundService extends Service {
 		udpLog.addFilter(LogType.DEBUG);
 		udpLog.addFilter(LogType.TRACE);
 		udpLog.addFilter(LogType.HANDOFF);
+		udpLog.addFilter(LogType.ACCOUNTING);
 		
 		traceLog = new EventLog();
 						
@@ -124,7 +125,7 @@ public class BackgroundService extends Service {
 				mobileDataOn = false;
 				mobileBytesInc = mobileInfo.getTotalRxByte() + mobileInfo.getTotalTxByte() - mobileBytes;
 				sendMsg2Ui(Msg.LOCAL_BYTES, Long.valueOf(mobileBytesInc));				
-				EventLog.writePublic(LogType.BYTES, String.valueOf(mobileBytesInc));				
+				EventLog.writePublic(LogType.DEBUG, "LocalBytes;" + String.valueOf(mobileBytesInc));				
 			}
 		}
 	}
@@ -208,13 +209,13 @@ public class BackgroundService extends Service {
 		}
 		
 		int rate = Integer.parseInt(prefs.getString("udp_rate", "100"));		
-		buf[7] = (byte) ((rate) & 0xFF);
-		buf[6] = (byte) ((rate >> 8) & 0xFF);
-		buf[5] = (byte) ((rate >> 16) & 0xFF);
-		buf[4] = (byte) ((rate >> 24) & 0xFF);			
+		buf[8] = (byte) ((rate) & 0xFF);
+		buf[7] = (byte) ((rate >> 8) & 0xFF);
+		buf[6] = (byte) ((rate >> 16) & 0xFF);
+		buf[5] = (byte) ((rate >> 24) & 0xFF);			
 		
 		String serverAddr = prefs.getString("server_addr", "192.155.86.168");
-		int serverPort = Integer.parseInt(prefs.getString("server_port", "9999"));
+		int serverPort = Integer.parseInt(prefs.getString("server_udp_port", "9999"));
 		SocketAddress serverAddress = new InetSocketAddress(serverAddr, serverPort);
 		try {
 			DatagramPacket pkt = new DatagramPacket(buf, buf.length, serverAddress);
@@ -237,7 +238,7 @@ public class BackgroundService extends Service {
 		}
 		
 		String serverAddr = prefs.getString("server_addr", "192.155.86.168");
-		int serverPort = Integer.parseInt(prefs.getString("server_port", "9999"));
+		int serverPort = Integer.parseInt(prefs.getString("server_udp_port", "9999"));
 		SocketAddress serverAddress = new InetSocketAddress(serverAddr, serverPort);
 		try {
 			DatagramPacket pkt = new DatagramPacket(buf, buf.length, serverAddress);
@@ -313,6 +314,7 @@ public class BackgroundService extends Service {
 		}, 0);
 		
 		udpLog.writePrivate(LogType.UDP, "Stop");
+		lastTestLog = udpLog.getFilename();
 		udpLog.close();
 	}
 	
@@ -354,10 +356,10 @@ public class BackgroundService extends Service {
 		}
 	}
 	
-	public void stopPingpong() {
-		sendMsg2Ui(Msg.TASK_STATE, "Stop Pingpong");
-		EventLog.writePublic(LogType.DEBUG, "pingpong stop");
+	public void stopPingpong() {		
 		if (pingpongRunning) {
+			sendMsg2Ui(Msg.TASK_STATE, "Stop Pingpong");
+			EventLog.writePublic(LogType.DEBUG, "pingpong stop");
 			pingpongRunning = false;
 			switchTimer.cancel();
 			switchTimer = new Timer();
@@ -411,6 +413,22 @@ public class BackgroundService extends Service {
 			sendMsg2Ui(Msg.TASK_STATE, "Stop Trace");
 			traceLog.close();			
 		}
+	}
+	
+	public void addAccountingData(double opBefore, double opAfter) {
+		try {
+			if (lastTestLog != null) {
+				udpLog.open(lastTestLog);
+				long op1, op2;
+				op1 = (long) (opBefore * 1024);
+				op2 = (long) (opAfter * 1024);
+				udpLog.writePrivate(LogType.ACCOUNTING, mobileBytesInc + ";" + op1 + ";" + op2);
+				udpLog.close();
+			}
+		} catch (Exception e) {
+			EventLog.writePublic(LogType.DEBUG, e.toString());
+		}
+		
 	}
 
 }

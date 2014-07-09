@@ -21,7 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:columnCount="3"
-            android:rowCount="11" >
+            android:rowCount="12" >
 
             <TextView
                 android:id="@+id/textView1"
@@ -99,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:onClick="onClickPingpongStop"
                 android:text="Stop" />
-            
+
             <TextView
                 android:id="@+id/textView3"
                 android:layout_column="0"
@@ -108,8 +108,6 @@
                 android:text="UDP"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
-            
-
             <Button
                 android:id="@+id/button8"
                 style="?android:attr/buttonStyleSmall"
@@ -117,9 +115,9 @@
                 android:layout_column="1"
                 android:layout_gravity="left|top"
                 android:layout_row="3"
-                android:text="Start"
-                android:onClick="onClickUdpStart" />
-            
+                android:onClick="onClickUdpStart"
+                android:text="Start" />
+
             <Button
                 android:id="@+id/button7"
                 style="?android:attr/buttonStyleSmall"
@@ -127,9 +125,9 @@
                 android:layout_column="2"
                 android:layout_gravity="left|top"
                 android:layout_row="3"
-                android:text="Stop"
-                android:onClick="onClickUdpStop" />
-            
+                android:onClick="onClickUdpStop"
+                android:text="Stop" />
+
             <TextView
                 android:id="@+id/textView4"
                 android:layout_column="0"
@@ -142,22 +140,21 @@
                 android:id="@+id/button9"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="80dp"
-                android:layout_column="2"
+                android:layout_column="1"
                 android:layout_gravity="left|top"
                 android:layout_row="4"
-                android:text="Start"
-                android:onClick="onClickTraceStart" />
+                android:onClick="onClickTraceStart"
+                android:text="Start" />
 
             <Button
                 android:id="@+id/button6"
                 style="?android:attr/buttonStyleSmall"
                 android:layout_width="80dp"
-                android:layout_column="1"
+                android:layout_column="2"
                 android:layout_gravity="left|top"
                 android:layout_row="4"
-                android:text="Stop"
-                android:onClick="onClickTraceStop" />
-            
+                android:onClick="onClickTraceStop"
+                android:text="Stop" />
 
             <TextView
                 android:id="@+id/textView6"
@@ -179,15 +176,24 @@
             <Button
                 android:id="@+id/button3"
                 style="?android:attr/buttonStyleSmall"
-                android:layout_column="2"
                 android:layout_width="80dp"
+                android:layout_column="2"
                 android:layout_gravity="left|top"
                 android:layout_row="5"
-                android:text="Refresh"
-                android:onClick="onClickRefreshTraffic" />
+                android:onClick="onClickRefreshTraffic"
+                android:text="Refresh" />
 
+            
         </GridLayout>
 
+        <Button
+            android:id="@+id/button12"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Operator Data Usage"
+            android:onClick="onClickAddOpData" />
+        
         <EditText
             android:id="@+id/msgbox"
             android:layout_width="match_parent"

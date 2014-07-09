@@ -9,8 +9,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -118,8 +123,55 @@ public class MainActivity extends Activity {
 		BackgroundService.getInstance().stopTrace();		
 	}
 	
-	public void onClickTrafficRefresh(View view) {
+	public void onClickRefreshTraffic(View view) {
 		sendMsg2Service(Msg.LOCAL_BYTES, null);
+	}
+	
+	public static class OpDataDialog extends DialogFragment {
+		private EditText opDataBefore, opDataAfter;
+		
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			LayoutInflater inflater = getActivity().getLayoutInflater();
+			View view = inflater.inflate(R.layout.dialog_opdata, null);
+			builder.setView(view);
+			builder.setTitle("Input Data Usage from Operator");
+			
+			opDataBefore = (EditText) view.findViewById(R.id.editTextOpDataBefore);
+			opDataAfter = (EditText) view.findViewById(R.id.editTextOpDataAfter);
+			
+			builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					try {
+						double op1, op2;
+						op1 = Double.parseDouble(opDataBefore.getText().toString());
+						op2 = Double.parseDouble(opDataAfter.getText().toString());
+						BackgroundService.getInstance().addAccountingData(op1, op2);						
+					} catch (Exception e) {
+						EventLog.writePublic(LogType.DEBUG, e.toString());
+						
+					}
+					
+				}
+			});
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					
+				}
+			});
+
+			return builder.create();
+		}
+	}
+	
+	public void onClickAddOpData(View view) {
+		(new OpDataDialog()).show(getFragmentManager(), "Op Data");
+		
 	}
 	
 	@Override
@@ -165,5 +217,7 @@ public class MainActivity extends Activity {
 			// TODO: handle exception
 		}
 	}
+	
+	
 
 }

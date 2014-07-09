@@ -20,7 +20,7 @@ public class EventLog {
 	public static final String SEPARATOR = ";";
 
 	public static enum LogType {
-		DEBUG, UDP, PINGPONG, BYTES, TRACE, HANDOFF
+		DEBUG, UDP, PINGPONG, TRACE, HANDOFF, ACCOUNTING
 	};
 	
 	private static Set<EventLog> loggers = new HashSet<EventLog>();
@@ -28,6 +28,11 @@ public class EventLog {
 	private Set<LogType> filters;
 
 	private PrintWriter writer;
+	private String filename;
+	
+	public String getFilename() {
+		return filename;
+	}
 	
 	public void close() {
 		if (writer != null) {
@@ -69,17 +74,22 @@ public class EventLog {
 		boolean ret = true;
 		try {
 			File dir = new File(Environment.getExternalStorageDirectory()
-					+ File.separator + "dnsexp" + File.separator + "log");
+					+ File.separator + TAG + File.separator + "log");
 			if (!dir.exists()) {
 				dir.mkdirs();
-			}			
-			writer = new PrintWriter(new FileOutputStream(new File(
-					dir.getAbsolutePath(), fileName)), true);
-		} catch (FileNotFoundException e) {
+			}
+			File logfile = new File(dir.getAbsolutePath(), fileName);
+			writer = new PrintWriter(new FileOutputStream(logfile), true);
+			this.filename = fileName;
+			//EventLog.writePublic(LogType.DEBUG, "Open log file " + logfile);
+		} catch (Exception e) {
 			writer = null;
 			ret = false;
+			EventLog.writePublic(LogType.DEBUG, "Fail to open log file");
 		}
+		
 		loggers.add(this);
+		
 		return ret;
 	}
 
@@ -100,7 +110,7 @@ public class EventLog {
 		return sb.toString();
 	}	
 	
-	public static void write2(PrintWriter writer, String formatedData) {
+	private static void write2(PrintWriter writer, String formatedData) {
 		if (writer != null) {
 			synchronized (writer) {
 				writer.println(formatedData);
@@ -139,8 +149,8 @@ public class EventLog {
 		String formatedData = data2FormatedData(type, data);
 		if (type != LogType.TRACE)
 			Log.d(TAG, formatedData);
-		if (filterType(type))
-			write2(writer, formatedData);			
+		//if (filterType(type))
+		write2(writer, formatedData);			
 	}	
 
 }

@@ -2,7 +2,7 @@
     
     
     <EditTextPreference        
-        android:defaultValue="192.155.86.255"        
+        android:defaultValue="192.155.86.168"        
         android:key="server_addr"
         android:maxLines="1"
         android:selectAllOnFocus="true"

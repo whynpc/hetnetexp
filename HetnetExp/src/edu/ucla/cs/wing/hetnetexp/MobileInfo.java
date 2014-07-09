@@ -11,6 +11,7 @@ import java.net.NetworkInterface;
 import java.util.Enumeration;
 import java.util.List;
 
+import edu.ucla.cs.wing.hetnetexp.EventLog.LogType;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -41,7 +42,7 @@ public class MobileInfo {
 	private int cellId = 0; /* Cell Id */
 	private int lac = 0; /* Location Area */
 	private int psc = 0; /* Scrambling code */
-	private float speed = 0;	
+	private float speed = 0;
 	private double geoLat = 0.0, geoLong = 0.0;
 	private String networkTech = ""; /* ex: GSM or CDMA */
 	private String neighborStatus = "";
@@ -85,9 +86,11 @@ public class MobileInfo {
 		mListener = new MobilePhoneStateListener();
 		telMgr = (TelephonyManager) mContext
 				.getSystemService(Context.TELEPHONY_SERVICE);
-		telMgr.listen(mListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
-		telMgr.listen(mListener, PhoneStateListener.LISTEN_CELL_LOCATION);
-		telMgr.listen(mListener, PhoneStateListener.LISTEN_CALL_STATE);
+		telMgr.listen(mListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
+				| PhoneStateListener.LISTEN_CELL_LOCATION
+				| PhoneStateListener.LISTEN_CALL_STATE);
+		// telMgr.listen(mListener, PhoneStateListener.LISTEN_CELL_LOCATION);
+		// telMgr.listen(mListener, PhoneStateListener.LISTEN_CALL_STATE);
 
 		connectivityManager = (ConnectivityManager) mContext
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -108,12 +111,13 @@ public class MobileInfo {
 				wifiSignalStrength = info.getRssi();
 			}
 		}, new IntentFilter(WifiManager.RSSI_CHANGED_ACTION));
-		
+
 		/* Location Service */
-		mlocManager =
-		(LocationManager)mContext.getSystemService(Context.LOCATION_SERVICE);
+		mlocManager = (LocationManager) mContext
+				.getSystemService(Context.LOCATION_SERVICE);
 		mlocListener = new MobileLocationListener();
-		mlocManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, 0, 0, mlocListener);
+		mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
+				mlocListener);
 
 	}
 
@@ -138,21 +142,18 @@ public class MobileInfo {
 	public int getWifiSignalStrength() {
 		return wifiSignalStrength;
 	}
-	
-	
-	
-	
+
 	public int getWifiSignal() {
 		try {
 			WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 			int rssi = wifiInfo.getRssi();
-			return rssi;			
-			
+			return rssi;
+
 		} catch (Exception e) {
 			return -100;
 		}
 	}
-	
+
 	public String getWifiSsid() {
 		try {
 			WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -227,7 +228,6 @@ public class MobileInfo {
 		}
 		return networkTech;
 	}
-	
 
 	public String getDnsServer(int num) {
 		String server = null;
@@ -456,8 +456,9 @@ public class MobileInfo {
 				for (Enumeration<InetAddress> enumIpAddr = intf
 						.getInetAddresses(); enumIpAddr.hasMoreElements();) {
 					InetAddress inetAddress = enumIpAddr.nextElement();
+					// EventLog.writePublic(LogType.DEBUG,
+					// inetAddress.toString());
 					if (!inetAddress.isLoopbackAddress()
-							&& !inetAddress.isSiteLocalAddress()
 							&& inetAddress instanceof Inet4Address) {
 						ip = inetAddress.getHostAddress();
 					}
@@ -490,6 +491,5 @@ public class MobileInfo {
 		}
 		return result;
 	}
-	
-	
+
 }

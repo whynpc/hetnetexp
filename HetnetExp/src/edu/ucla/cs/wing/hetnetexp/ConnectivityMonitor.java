@@ -16,6 +16,7 @@ public class ConnectivityMonitor extends BroadcastReceiver {
 		if (bundle.containsKey("networkInfo")) {
 			NetworkInfo networkInfo = (NetworkInfo) bundle.get("networkInfo");
 			if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
+				Log.d("hetnet", networkInfo.toString());
 				if (BackgroundService.getInstance() != null) {
 					BackgroundService.getInstance().onMobileDataChange(
 							networkInfo.isConnectedOrConnecting());
