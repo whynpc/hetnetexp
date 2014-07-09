@@ -61,9 +61,13 @@ public class SettingsActivity extends PreferenceActivity {
 
 		// Add 'general' preferences.
 		addPreferencesFromResource(R.xml.pref_general);
+		bindPreferenceSummaryToValue(findPreference("server_addr"));
+		bindPreferenceSummaryToValue(findPreference("server_port"));
+		bindPreferenceSummaryToValue(findPreference("udp_rate"));
 		bindPreferenceSummaryToValue(findPreference("pingpong_delay"));
 		bindPreferenceSummaryToValue(findPreference("pingpong_interval"));
 		bindPreferenceSummaryToValue(findPreference("pingpong_rounds"));
+		bindPreferenceSummaryToValue(findPreference("log_interval"));
 		
 
 		// Add 'notifications' preferences, and a corresponding header.

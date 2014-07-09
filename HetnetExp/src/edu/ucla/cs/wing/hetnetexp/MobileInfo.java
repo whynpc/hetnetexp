@@ -41,9 +41,8 @@ public class MobileInfo {
 	private int cellId = 0; /* Cell Id */
 	private int lac = 0; /* Location Area */
 	private int psc = 0; /* Scrambling code */
-	private float speed = 0;
-	private String geoLat = ""; /* ex: 41.11665289 */
-	private String geoLong = ""; /* ex: -73.71944653 */
+	private float speed = 0;	
+	private double geoLat = 0.0, geoLong = 0.0;
 	private String networkTech = ""; /* ex: GSM or CDMA */
 	private String neighborStatus = "";
 	private String networkTypeStr = ""; /* ex: GPRS, UMTS, HSPA, .. */
@@ -109,6 +108,13 @@ public class MobileInfo {
 				wifiSignalStrength = info.getRssi();
 			}
 		}, new IntentFilter(WifiManager.RSSI_CHANGED_ACTION));
+		
+		/* Location Service */
+		mlocManager =
+		(LocationManager)mContext.getSystemService(Context.LOCATION_SERVICE);
+		mlocListener = new MobileLocationListener();
+		mlocManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, 0, 0, mlocListener);
+
 	}
 
 	public void setMobileDataEnabled(boolean enabled) {
@@ -131,6 +137,29 @@ public class MobileInfo {
 
 	public int getWifiSignalStrength() {
 		return wifiSignalStrength;
+	}
+	
+	
+	
+	
+	public int getWifiSignal() {
+		try {
+			WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+			int rssi = wifiInfo.getRssi();
+			return rssi;			
+			
+		} catch (Exception e) {
+			return -100;
+		}
+	}
+	
+	public String getWifiSsid() {
+		try {
+			WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+			return wifiInfo.getSSID();
+		} catch (Exception e) {
+			return "NULL";
+		}
 	}
 
 	/* Retrieve Phone Model */
@@ -179,12 +208,12 @@ public class MobileInfo {
 	}
 
 	/* Retrieve the latitude of current location */
-	public String getGeoLat() {
+	public double getGeoLat() {
 		return geoLat;
 	}
 
 	/* Retrieve the longitude of current location */
-	public String getGeoLong() {
+	public double getGeoLong() {
 		return geoLong;
 	}
 
@@ -198,6 +227,7 @@ public class MobileInfo {
 		}
 		return networkTech;
 	}
+	
 
 	public String getDnsServer(int num) {
 		String server = null;
@@ -392,8 +422,8 @@ public class MobileInfo {
 
 		@Override
 		public void onLocationChanged(Location loc) {
-			geoLat = "" + loc.getLatitude();
-			geoLong = "" + loc.getLongitude();
+			geoLat = loc.getLatitude();
+			geoLong = loc.getLongitude();
 			speed = loc.getSpeed();
 		}
 
@@ -437,7 +467,6 @@ public class MobileInfo {
 		} catch (Exception e) {
 
 		}
-
 	}
 
 	public String getNeighboringCells() {
@@ -461,4 +490,6 @@ public class MobileInfo {
 		}
 		return result;
 	}
+	
+	
 }

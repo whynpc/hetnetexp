@@ -1,4 +1,31 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    
+    
+    <EditTextPreference        
+        android:defaultValue="192.155.86.255"        
+        android:key="server_addr"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Server Addr" />
+    
+    <EditTextPreference        
+        android:defaultValue="9999"
+        android:inputType="number"
+        android:key="server_udp_port"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Server UDP Port" />
+    
+    <EditTextPreference        
+        android:defaultValue="100"
+        android:inputType="number"
+        android:key="udp_rate"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="UDP rate (kbps)" />
 
     
     <EditTextPreference        
@@ -20,7 +47,7 @@
         android:title="Pingpong intverval (ms)" />
     
     <EditTextPreference        
-        android:defaultValue="5"
+        android:defaultValue="6"
         android:inputType="number"
         android:key="pingpong_rounds"
         android:maxLines="1"
@@ -28,6 +55,15 @@
         android:singleLine="true"
         android:title="Pingpong rounds" />
     
+    
+    <EditTextPreference        
+        android:defaultValue="100"
+        android:inputType="number"
+        android:key="log_interval"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Log Interval (ms)" />
     
     
 

@@ -6,6 +6,8 @@ import java.util.Queue;
 
 import edu.ucla.cs.wing.hetnetexp.EventLog.LogType;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
@@ -16,9 +18,19 @@ import android.widget.EditText;
 
 public class MainActivity extends Activity {
 	
-	private Queue<String> msgQueue = new LinkedList<String>();
+	private static Handler _handler;
 	
-	private EditText msgbox;
+	public static Handler getHandler() {
+		return _handler;
+	}
+	
+	
+	private Queue<String> msgQueue = new LinkedList<String>();
+	private static final int MSG_QUEUE_MAX_SIZE = 5;
+	
+	
+	
+	private EditText msgbox, editTextTraffic;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -26,8 +38,35 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		msgbox = (EditText) findViewById(R.id.msgbox);
+		editTextTraffic = (EditText) findViewById(R.id.editTextTraffic);
+		
+		_handler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				switch (msg.what) {
+				case Msg.TASK_STATE:
+					updateMsgbox((String) msg.obj);
+					break;
+				case Msg.LOCAL_BYTES:
+					long bytes = (Long) msg.obj;
+					bytes /= 1024;
+					editTextTraffic.setText(String.valueOf(bytes));
+					break;
+				default:
+					break;
+				}
+				
+			}
+		};
 		
 		startService(new Intent(this, BackgroundService.class));
+	}
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		_handler = null;
+		
 	}
 
 	@Override
@@ -56,35 +95,31 @@ public class MainActivity extends Activity {
 	}
 	
 	public void onClickUdpStart(View view) {
-		
-	
+		BackgroundService.getInstance().startUdp();
 	}
 	
 	public void onClickUdpStop(View view) {
-		
+		BackgroundService.getInstance().stopUdp();
 	}
 	
-	public void onClickTcpStart(View view) {
-		
-	}
-	
-	public void onClickTcpStop(View view) {
-		
-		
-	}
-	
-	public void onClickPingpongStart(View view) {	
-		EventLog.writePublic(LogType.DEBUG, "pingpong start");
+	public void onClickPingpongStart(View view) {			
 		BackgroundService.getInstance().startPingpong();
 	} 
 	
-	public void onClickPingpongStop(View view) {	
-		EventLog.writePublic(LogType.DEBUG, "pingpong stop");
+	public void onClickPingpongStop(View view) {			
 		BackgroundService.getInstance().stopPingpong();
 	}
 	
-	public void onClickDebug(View view) {
-		
+	public void onClickTraceStart(View view) {
+		BackgroundService.getInstance().startTrace();
+	}
+	
+	public void onClickTraceStop(View view) {
+		BackgroundService.getInstance().stopTrace();		
+	}
+	
+	public void onClickTrafficRefresh(View view) {
+		sendMsg2Service(Msg.LOCAL_BYTES, null);
 	}
 	
 	@Override
@@ -101,8 +136,11 @@ public class MainActivity extends Activity {
 		return true;
 	}	
 	
-	private void updateMsgbox() {
-		while (msgQueue.size() > 5) {
+	private void updateMsgbox(String newMsg) {
+		if (newMsg != null) {
+			msgQueue.add(newMsg);
+		}
+		while (msgQueue.size() > MSG_QUEUE_MAX_SIZE) {
 			msgQueue.poll();
 		}
 		StringBuilder sb = new StringBuilder();
@@ -112,6 +150,20 @@ public class MainActivity extends Activity {
 		}
 		msgbox.setText(sb.toString());		
 		
+	}
+	
+	private void sendMsg2Service(int what, Object obj) {
+		try {
+			Handler client = BackgroundService.getInstance().getHandler();
+			if (client != null) {
+				Message msg = new Message();
+				msg.what = what;
+				msg.obj = obj;
+				client.sendMessage(msg);
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 	}
 
 }

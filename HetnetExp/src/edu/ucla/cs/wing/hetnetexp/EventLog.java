@@ -20,10 +20,12 @@ public class EventLog {
 	public static final String SEPARATOR = ";";
 
 	public static enum LogType {
-		DEBUG, DNSQUERY, DNSREPONSE, TCP, PING, APP, META, SCREEN
+		DEBUG, UDP, PINGPONG, BYTES, TRACE, HANDOFF
 	};
 	
-	private static Set<EventLog> loggers = new HashSet<EventLog>(); 
+	private static Set<EventLog> loggers = new HashSet<EventLog>();
+	
+	private Set<LogType> filters;
 
 	private PrintWriter writer;
 	
@@ -31,12 +33,24 @@ public class EventLog {
 		if (writer != null) {
 			writer.flush();
 			writer.close();
+			writer = null;
 		}
 		loggers.remove(this);
 	}
 	
 	public EventLog() {
 		
+	}
+	
+	public void addFilter(LogType t) {
+		if (filters == null) {
+			filters = new HashSet<EventLog.LogType>();			
+		}
+		filters.add(t);		
+	}
+	
+	public boolean filterType(LogType t) {
+		return (filters == null || filters.contains(t));
 	}
 	
 	public PrintWriter getWriter() {
@@ -113,16 +127,20 @@ public class EventLog {
 	
 	public static void writePublic(LogType type, String data) {	
 		String formatedData = data2FormatedData(type, data);
-		Log.d(TAG, formatedData);		
+		if (type != LogType.TRACE)
+			Log.d(TAG, formatedData);		
 		for (EventLog logger : loggers) {
-			write2(logger.writer, formatedData);			
+			if (logger.filterType(type))
+				write2(logger.writer, formatedData);			
 		}
 	}	
 		
 	public void writePrivate(LogType type, String data) {
 		String formatedData = data2FormatedData(type, data);
-		Log.d(TAG, formatedData);
-		write2(writer, formatedData);			
+		if (type != LogType.TRACE)
+			Log.d(TAG, formatedData);
+		if (filterType(type))
+			write2(writer, formatedData);			
 	}	
 
 }
